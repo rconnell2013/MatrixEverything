@@ -1,5 +1,7 @@
 # file: "Matricies.py"
-def Id(n):
+from fractions import Fraction
+
+def Id(n): #returns Identity matrix of size n
     A = Matrix(n,n)
     # loop through and make diagnals 1s
     for x in range(A.crow):
@@ -21,13 +23,12 @@ class Matrix:
                     
     def define(self, *args):
         #assert len(args) == self.crow * self.ccol, "Please enter the approopareateareate amount of elements
-        # Pad etra length with 0
+        #could Pad etra length with 0/ignore extra arguments
         ref = 0
         for x in range(self.crow):
             for y in range(self.ccol):
                 self.elements[x][y] = args[ref]
                 ref = ref + 1
-        self.isReg = (self.det() != 0)
                 
     def display(self):
         for i in range(self.crow):
@@ -45,14 +46,6 @@ class Matrix:
 
     #OPERATORS
     def __mul__(self, other):
-
-        #if ( type(other) != Matrix ):
-            ## = Matrix(self.crow,self.ccol)
-            #for m in range(self.crow):
-                #for n in range(self.ccol):
-                   # temp.elements[m][n] = other * self.elements[m][n]
-           # return temp
-        #else:
         assert self.ccol == other.crow, "for A(nxm)*B(pxq), m must equal p"
         temp = Matrix(self.crow, other.ccol)
         ref = 0
@@ -81,10 +74,12 @@ class Matrix:
             for n in range(self.ccol):
                 temp.elements[m][n] = self.elements[m][n] + other.elements[m][n]
         return temp
+
+    #add exponentiation function(fastexp) and A**(-1) accomodation.
         
     #ELEMENTARY OPERATIONS
     
-    def row_multk(self,n,k): #n is row to be multiplied, k is constant to multiply by
+    def row_multk(self,n,k): #multiply row n by k
         temp = Id(self.crow)
         temp.setElement(n,n,k)
         return temp * self
@@ -102,7 +97,7 @@ class Matrix:
 
     #MATRIX OPERATIONS
 
-    def Minor(self,i,j):
+    def minor(self,i,j): #finds minor of matrix
         assert self.sq == True, "Matrix must be a square matrix"
         temp = Matrix(self.crow - 1 , self.ccol - 1)
         x = 0
@@ -123,16 +118,55 @@ class Matrix:
             x = x + 1
             y = 0
         return temp
-    def det(self):
+    def det(self): #Finds determinant of matrix using Cofactors
         assert self.sq == True, "Matrix must be a square matrix"
         temp = 0
         if self.crow==2:
             return (self.elements[0][0] * self.elements[1][1]) - (self.elements[0][1] * self.elements[1][0])
         else:
             for m in range(self.ccol):
-                temp = temp + (((-1)**m) * self.elements[0][m] * self.Minor(0,m).det())
+                temp = temp + (((-1)**m) * self.elements[0][m] * self.minor(0,m).det())
             return temp
+
+    def diagDet(self): #uses list of row operations to find diagonal
+        alist = self.getRREF()
+        det = 1
+        for op in alist:
+            if op[0] == 0:
+                det = Fraction(det, op[2])
+        return det
     
+    def getRREF(self): #Gets list of operations needed to get from this matrix to the Identity
+        assert self.sq == True, "Matrix must be square"
+        temp = self
+        algorithm = list()
+        for m in range(self.ccol):
+            for n in range(self.ccol):
+                if m != n:
+                    nfact = temp.elements[n][m]
+                    algorithm.append([0,n,temp.elements[m][m]])
+                    temp = temp.row_multk(n,temp.elements[m][m])
+                    algorithm.append([1,m,n,-nfact])
+                    temp = temp.row_addk(m,n,-nfact)
+        for p in range(self.ccol):
+            algorithm.append([0,p,Fraction(1,temp.elements[p][p])])
+            temp = temp.row_multk(p,Fraction(1,temp.elements[p][p]))
+        return algorithm
+
+    #could move solve code into inverse function and multiply other by inverse to solve
+    def solve(self, other): #returns x for. Ax=b for matrix A=self and b=other
+        alist = self.getRREF()
+        temp = other
+        for op in alist:
+            if op[0] == 0:
+                temp = temp.row_multk(op[1], op[2])
+            if op[0] == 1:
+                temp = temp.row_addk(op[1],op[2],op[3])
+        return temp;
+
+    def inverse(self): #returns inverse of self matrix
+        return self.solve(Id(self.ccol))
+            
 
 
 
