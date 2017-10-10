@@ -75,7 +75,19 @@ class Matrix:
                 temp.elements[m][n] = self.elements[m][n] + other.elements[m][n]
         return temp
 
-    #add exponentiation function(fastexp) and A**(-1) accomodation.
+    def __pow__(self, k):
+        temp = self
+        if k < 0:
+            return temp.inverse()**(-k)
+        if k == 1:
+            return temp
+        if k%2 == 0:
+            temp = temp * temp
+            return temp**(k/2)
+        if k%2 == 1:
+            temp = temp * temp
+            return self * temp**((k-1)/2)
+
         
     #ELEMENTARY OPERATIONS
     
@@ -118,6 +130,7 @@ class Matrix:
             x = x + 1
             y = 0
         return temp
+    
     def det(self): #Finds determinant of matrix using Cofactors
         assert self.sq == True, "Matrix must be a square matrix"
         temp = 0
