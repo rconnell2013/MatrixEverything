@@ -1,2 +1,2 @@
 # MatrixEverything
-Does all matrix operations
+Does all matrix operations :)

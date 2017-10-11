@@ -86,6 +86,11 @@ class Matrix:
             return temp**(k/2)
         if k%2 == 1:
             temp = temp * temp
+
+            print "temp"
+            temp.display()
+            print "self"
+            self.display()
             return self * temp**((k-1)/2)
 
         
@@ -179,6 +184,15 @@ class Matrix:
 
     def inverse(self): #returns inverse of self matrix
         return self.solve(Id(self.ccol))
+
+
+    def transpose(self):
+        assert self.sq == True, "Matrix must be square"
+        temp = Matrix(self.crow,self.ccol)
+        for x in range(self.ccol):
+            for y in range(self.crow):
+                temp.setElement(x,y,self.elements[y][x])
+        return temp
             
 
 
