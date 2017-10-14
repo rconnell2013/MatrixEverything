@@ -1,5 +1,8 @@
 # file: "Matricies.py"
 from fractions import Fraction
+from factors import factorization
+from factors import primefact
+
 
 def Id(n): #returns Identity matrix of size n
     A = Matrix(n,n)
@@ -74,6 +77,9 @@ class Matrix:
             for n in range(self.ccol):
                 temp.elements[m][n] = self.elements[m][n] + other.elements[m][n]
         return temp
+
+    def __sub__(self, other):
+        return self + (-1 * other)
 
     def __pow__(self, k):
         temp = self
@@ -153,6 +159,7 @@ class Matrix:
             if op[0] == 0:
                 det = Fraction(det, op[2])
         return det
+
     
     def getRREF(self): #Gets list of operations needed to get from this matrix to the Identity
         assert self.sq == True, "Matrix must be square"
@@ -193,6 +200,15 @@ class Matrix:
             for y in range(self.crow):
                 temp.setElement(x,y,self.elements[y][x])
         return temp
+
+    def eiganvalR(self): #returns all real eiganvalues(if all eiganvalues are real)
+        assert self.sq == True, "Matrix must be square"
+        eigan = list()
+        for i in factorization(self.det()):
+            if (self - (i * Id(self.crow))).det() == 0:
+                eigan.append(i)
+        return eigan
+            
             
 
 
